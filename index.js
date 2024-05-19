@@ -18,13 +18,18 @@ app.get('/qualities', async (req, res) => {
     const info = await ytdl.getInfo(url);
     const formats = info.formats;
 
-    const filteredFormats = downloadType === 'video'
-      ? ytdl.filterFormats(formats, 'videoandaudio')
-      : ytdl.filterFormats(formats, 'audioonly');
+    let filteredFormats;
+    if (downloadType === 'videoandaudio') {
+      filteredFormats = ytdl.filterFormats(formats, 'videoandaudio');
+    } else if (downloadType === 'videoonly') {
+      filteredFormats = ytdl.filterFormats(formats, 'videoonly');
+    } else {
+      filteredFormats = ytdl.filterFormats(formats, 'audioonly');
+    }
 
     const qualities = filteredFormats
       .map(format => ({
-        qualityLabel: downloadType === 'video' ? format.qualityLabel : `${format.audioBitrate} kbps`,
+        qualityLabel: downloadType.includes('video') ? format.qualityLabel : `${format.audioBitrate} kbps`,
         itag: format.itag
       }))
       .filter(quality => quality.qualityLabel);
@@ -46,7 +51,7 @@ app.get('/download', async (req, res) => {
     const format = ytdl.chooseFormat(info.formats, { quality: itag });
 
     if (format) {
-      res.setHeader('Content-Disposition', `attachment; filename="${downloadType === 'video' ? 'video.' + format.container : 'audio.' + format.container}"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${downloadType.includes('video') ? 'video.' + format.container : 'audio.' + format.container}"`);
       ytdl(url, { format }).pipe(res);
     } else {
       console.error('No format found with the specified quality');

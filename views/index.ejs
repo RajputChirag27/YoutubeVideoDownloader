@@ -1,67 +1,73 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>YouTube Video Downloader</title>
-  <link rel="stylesheet" href="/styles.css" />
-</head>
-<body>
-  <h1>YouTube Video Downloader</h1>
-  <form>
-    <label for="videoUrl">Video URL:</label>
-    <input type="text" id="videoUrl" name="videoUrl" required />
-    <br />
-    <label for="downloadType">Download Type:</label>
-    <select id="downloadType" name="downloadType" onchange="fetchQualities()">
-      <option value="video">Video</option>
-      <option value="audio">Audio</option>
-    </select>
-    <br />
-    <label for="quality">Quality:</label>
-    <select id="quality" name="quality">
-      <option value="select" disabled selected>Select</option>
-    </select>
-    <br />
-    <button type="button" onclick="downloadVideo()">Download</button>
-  </form>
-  <script>
-    function fetchQualities() {
-      const videoUrl = document.getElementById('videoUrl').value;
-      const downloadType = document.getElementById('downloadType').value;
-      const qualitySelect = document.getElementById('quality');
+  <head>
+    <title>YouTube Video Downloader</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <h1>YouTube Video Downloader</h1>
+    <form>
+      <label for="videoUrl">Video URL:</label>
+      <input type="text" id="videoUrl" name="videoUrl" required />
+      <br />
+      <label for="downloadType">Download Type:</label>
+      <select id="downloadType" name="downloadType" onchange="fetchQualities()">
+        <option value="videoandaudio">Video & Audio</option>
+        <option value="videoonly">Video Only</option>
+        <option value="audio">Audio Only</option>
+      </select>
+      <br />
+      <label for="quality">Quality:</label>
+      <select id="quality" name="quality"></select>
+      <br />
+      <button type="button" onclick="downloadVideo()">Download</button>
+    </form>
+    <script>
+      function fetchQualities() {
+        const videoUrl = document.getElementById("videoUrl").value;
+        const downloadType = document.getElementById("downloadType").value;
+        const qualitySelect = document.getElementById("quality");
 
-      // Clear previous options
-      qualitySelect.innerHTML = '';
+        // Clear previous options
+        qualitySelect.innerHTML =
+          '<option value="select" disabled selected>Select</option>';
 
-      if (videoUrl) {
-        fetch(`/qualities?videoUrl=${encodeURIComponent(videoUrl)}&downloadType=${downloadType}`)
-          .then(response => response.json())
-          .then(qualities => {
-            qualities.forEach(quality => {
-              const option = document.createElement('option');
-              option.value = quality.itag;
-              option.text = quality.qualityLabel;
-              qualitySelect.add(option);
+        if (videoUrl) {
+          fetch(
+            `/qualities?videoUrl=${encodeURIComponent(
+              videoUrl
+            )}&downloadType=${downloadType}`
+          )
+            .then((response) => response.json())
+            .then((qualities) => {
+              qualities.forEach((quality) => {
+                const option = document.createElement("option");
+                option.value = quality.itag;
+                option.text = quality.qualityLabel;
+                qualitySelect.add(option);
+              });
+            })
+            .catch((error) => {
+              console.error("Error fetching qualities:", error);
             });
-          })
-          .catch(error => {
-            console.error('Error fetching qualities:', error);
-          });
+        }
       }
-    }
 
-    function downloadVideo() {
-      const videoUrl = document.getElementById('videoUrl').value;
-      const downloadType = document.getElementById('downloadType').value;
-      const itag = document.getElementById('quality').value;
+      function downloadVideo() {
+        const videoUrl = document.getElementById("videoUrl").value;
+        const downloadType = document.getElementById("downloadType").value;
+        const itag = document.getElementById("quality").value;
 
-      const url = `/download?videoUrl=${encodeURIComponent(videoUrl)}&downloadType=${downloadType}&itag=${encodeURIComponent(itag)}`;
-      const a = document.createElement('a');
-      a.href = url;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-  </script>
-</body>
+        const url = `/download?videoUrl=${encodeURIComponent(
+          videoUrl
+        )}&downloadType=${downloadType}&itag=${encodeURIComponent(itag)}`;
+        const a = document.createElement("a");
+        a.href = url;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    </script>
+  </body>
 </html>
